@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Puzzle Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #ffffff;
+        }
+        .container {
+            display: inline-block;
+            padding: 20px;
+            background-color: #b2d4dd;
+            border-radius: 10px;
+        }
+        table {
+            margin: auto;
+            border-collapse: collapse;
+        }
+        td {
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #3288c9;
+            border: 2px solid #ffffff;
+            cursor: pointer;
+        }
+        .empty {
+            background-color: #000000;
+            cursor: default;
+        }
+        button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Sliding Puzzle Game</h2>
+    <div class="container">
+        <p>Number of Moves: <span id="moveCount">0</span></p>
+        <p>Time: <span id="timer">0</span> seconds</p>
+        <button onclick="newGame()">New Game</button>
+        <button onclick="simpleGame()">Simple Game</button>
+        <table id="puzzle"></table>
+    </div>
+    <script>
+        let board = [];
+        let emptyRow = 3, emptyCol = 3;
+        let moveCount = 0;
+        let time = 0, timerInterval;
+        
+        function initializeBoard(shuffle = true) {
+            board = [];
+            let numbers = [...Array(15).keys()].map(n => n + 1);
+            if (shuffle) numbers.sort(() => Math.random() - 0.5);
+            for (let i = 0; i < 4; i++) {
+                board.push([]);
+                for (let j = 0; j < 4; j++) {
+                    if (numbers.length > 0) board[i].push(numbers.shift());
+                    else board[i].push(null);
+                }
+            }
+            emptyRow = 3;
+            emptyCol = 3;
+            moveCount = 0;
+            time = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                time++;
+                document.getElementById("timer").textContent = time;
+            }, 1000);
+            updateBoard();
+        }
+        
+        function updateBoard() {
+            const puzzle = document.getElementById("puzzle");
+            puzzle.innerHTML = "";
+            document.getElementById("moveCount").textContent = moveCount;
+            for (let i = 0; i < 4; i++) {
+                let row = puzzle.insertRow();
+                for (let j = 0; j < 4; j++) {
+                    let cell = row.insertCell();
+                    if (board[i][j] !== null) {
+                        cell.textContent = board[i][j];
+                        cell.onclick = () => moveTile(i, j);
+                    } else {
+                        cell.classList.add("empty");
+                    }
+                }
+            }
+        }
+        
+        function moveTile(row, col) {
+            if (Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1) {
+                board[emptyRow][emptyCol] = board[row][col];
+                board[row][col] = null;
+                emptyRow = row;
+                emptyCol = col;
+                moveCount++;
+                updateBoard();
+                checkWin();
+            }
+        }
+        
+        function checkWin() {
+            let correct = [...Array(15).keys()].map(n => n + 1);
+            let flatBoard = board.flat().filter(n => n !== null);
+            if (JSON.stringify(flatBoard) === JSON.stringify(correct)) {
+                setTimeout(() => {
+                    alert(`Congratulations!\nMoves: ${moveCount}\nTime: ${time} seconds`);
+                    newGame();
+                }, 500);
+            }
+        }
+        
+        function newGame() {
+            initializeBoard(true);
+        }
+        
+        function simpleGame() {
+            initializeBoard(false);
+            board[3][2] = null;
+            board[3][3] = 15;
+            emptyRow = 3;
+            emptyCol = 2;
+            updateBoard();
+        }
+        
+        newGame();
+    </script>
+</body>
+</html>
+<!-- Your website URL: https://ahmed-chowdhury-project2.s3.us-east-2.amazonaws.com/index.html -->
